@@ -185,4 +185,15 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
     {
         return $this->hasMany(Credit::class);
     }
+
+    /** Access relationships */
+    public function grantedAccesses()
+    {
+        return $this->hasMany(UserAccess::class, 'owner_user_id');
+    }
+
+    public function sharedAccounts()
+    {
+        return $this->hasMany(UserAccess::class, 'invited_user_id')->whereNotNull('accepted_at');
+    }
 }

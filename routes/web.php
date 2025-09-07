@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\SocialLoginController;
+use App\Http\Controllers\UserAccessController;
 use App\Http\Controllers\TicketAttachmentController;
 use App\Http\Middleware\MustVerfiyEmail;
 use App\Livewire\Auth;
@@ -51,6 +52,16 @@ Route::group(['middleware' => ['web', 'auth']], function () {
     Route::get('account', Client\Account::class)->name('account');
     Route::get('account/security', Client\Security::class)->name('account.security');
     Route::get('account/credits', Client\Credits::class)->name('account.credits');
+
+    // User access management
+    Route::get('account/access', [UserAccessController::class, 'index'])->name('user-access.index');
+    Route::post('account/access', function(\Illuminate\Http\Request $request, UserAccessController $controller){
+        // convert permissions_list to array
+        $request->merge(['permissions' => array_filter(array_map('trim', explode(',', $request->input('permissions_list', ''))))]);
+        return $controller->store($request);
+    })->name('user-access.store');
+    Route::post('account/access/switch', [UserAccessController::class, 'switch'])->name('user-access.switch');
+    Route::get('account/access/accept/{token}', [UserAccessController::class, 'accept'])->name('user-access.accept');
 
     Route::get('/email/verify', Auth\VerifyEmail::class)->name('verification.notice');
     Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
